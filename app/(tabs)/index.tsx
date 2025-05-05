@@ -1,75 +1,90 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import HistoryItems from "@/constants/Items";
+import { useState } from "react";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
+export default function GoalScreen() {
+  const [item, setItem] = useState("");
+  const [items, setItems] = useState<{ title: string; id: string }[]>([]);
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+  function handleAddItem() {
+    setItems((items) => [
+      ...items,
+      { title: item, id: Math.random().toString() },
+    ]);
+    setItem("");
+  }
 
-export default function HomeScreen() {
+  function handleChangeInput(text: string) {
+    setItem(text);
+  }
+
+  function handleDeleteItem(id: string) {
+    const today = new Date();
+    const deletedItem = items.find((item) => item.id === id);
+    setItems((items) => items.filter((item) => item !== deletedItem));
+    HistoryItems.push({ ...deletedItem!, deleteAt: today.toISOString() });
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View
+      style={{
+        flexDirection: "column",
+        paddingVertical: 64,
+        paddingHorizontal: 24,
+        gap: 18,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 12,
+        }}
+      >
+        <TextInput
+          value={item}
+          onChangeText={handleChangeInput}
+          placeholder="Add your goal"
+          style={{ borderWidth: 1, borderRadius: 12, flex: 2, padding: 8 }}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "purple",
+            borderRadius: 12,
+            alignItems: "center",
+            padding: 8,
+          }}
+          onPress={handleAddItem}
+        >
+          <Text style={{ color: "white", fontWeight: "600" }}>Add goal</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ gap: 14 }}>
+        {items.map((item) => {
+          return (
+            <View
+              key={item.id}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text>{item.title}</Text>
+              <TouchableOpacity
+                onPress={() => handleDeleteItem(item.id)}
+                style={{
+                  backgroundColor: "red",
+                  padding: 2,
+                  borderRadius: 4,
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "600" }}>
+                  Delete
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
